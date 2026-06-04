@@ -1,7 +1,16 @@
 # 🎨 Color TSR - Syntax Highlighting for MS-DOS
 
-[![License](https://img.shields.io/badge/License-LGPL_3.0-blue)](https://licenses.nuget.org/LGPL-3.0-or-later)
-![Language](https://img.shields.io/github/languages/top/Hawkynt/ColorTSR?color=purple)
+[![License](https://img.shields.io/github/license/Hawkynt/ColorTSR)](https://github.com/Hawkynt/ColorTSR/blob/main/LICENSE)
+[![Language](https://img.shields.io/github/languages/top/Hawkynt/ColorTSR?color=8957D5)](https://github.com/Hawkynt/ColorTSR)
+
+![Last Commit](https://img.shields.io/github/last-commit/Hawkynt/ColorTSR?branch=main)
+![Activity](https://img.shields.io/github/commit-activity/m/Hawkynt/ColorTSR)
+
+[![Stars](https://img.shields.io/github/stars/Hawkynt/ColorTSR?color=FFD700)](https://github.com/Hawkynt/ColorTSR/stargazers)
+[![Forks](https://img.shields.io/github/forks/Hawkynt/ColorTSR?color=008080)](https://github.com/Hawkynt/ColorTSR/network/members)
+[![Issues](https://img.shields.io/github/issues/Hawkynt/ColorTSR)](https://github.com/Hawkynt/ColorTSR/issues)
+![Code Size](https://img.shields.io/github/languages/code-size/Hawkynt/ColorTSR?color=4CAF50)
+![Repo Size](https://img.shields.io/github/repo-size/Hawkynt/ColorTSR?color=FF9800)
 
 > Ever wished for a splash of color in your MS-DOS text editor? ✨ This little TSR brings syntax highlighting to your favorite classic editors!
 
