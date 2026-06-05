@@ -2,6 +2,8 @@
 
 [![License](https://img.shields.io/github/license/Hawkynt/ColorTSR)](https://github.com/Hawkynt/ColorTSR/blob/main/LICENSE)
 [![Language](https://img.shields.io/github/languages/top/Hawkynt/ColorTSR?color=8957D5)](https://github.com/Hawkynt/ColorTSR)
+[![Build](https://github.com/Hawkynt/ColorTSR/actions/workflows/ci.yml/badge.svg)](https://github.com/Hawkynt/ColorTSR/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Hawkynt/ColorTSR)](https://github.com/Hawkynt/ColorTSR/releases/latest)
 
 ![Last Commit](https://img.shields.io/github/last-commit/Hawkynt/ColorTSR?branch=main)
 ![Activity](https://img.shields.io/github/commit-activity/m/Hawkynt/ColorTSR)
@@ -36,10 +38,7 @@ This TSR works with many text-based editors on MS-DOS, including:
 
 ## 🛠️ How to Use
 
-1.  **Assemble the code:** You'll need an assembler like [NASM](https://www.nasm.us/) or [TASM](https://en.wikipedia.org/wiki/Turbo_Assembler).
-    ```bash
-    nasm -f bin COLTSR.ASM -o COLTSR.COM
-    ```
+1.  **Get the binary:** Download `COLTSR.COM` from the [latest release](https://github.com/Hawkynt/ColorTSR/releases/latest), or build it yourself (see below).
 2.  **Run the TSR:**
     ```bash
     COLTSR.COM
@@ -55,6 +54,30 @@ This TSR works with many text-based editors on MS-DOS, including:
     COLTSR.COM
     ```
     Running the program again will unload it from memory.
+
+## 🏗️ Building from Source
+
+The source is written in MASM/TASM dialect. It assembles with the open-source [JWasm](https://github.com/Baron-von-Riedesel/JWasm) (or [UASM](https://github.com/Terraspace/UASM)) on any modern OS, and with Borland's TASM on real DOS:
+
+```bash
+# JWasm (Windows/Linux/macOS)
+jwasm -bin -Fo=COLTSR.COM COLTSR.ASM
+
+# or simply
+make
+```
+
+> **Note:** NASM will *not* assemble this source — it uses a different syntax dialect.
+
+## ✅ Testing
+
+The test suite runs the real binary inside [DOSBox](https://www.dosbox.com/) and verifies its observable behavior: install/uninstall messages, actual colorization of video memory (digits, operators, strings — including boundary cells), the negative control after removal, and the refusal to unload while another TSR owns the interrupt vectors.
+
+```bash
+make test            # needs jwasm + dosbox on the PATH
+```
+
+Both build and tests run automatically in CI on every push and pull request; tagging `v*` builds, tests, and publishes a release.
 
 ## ⚠️ Limitations
 
