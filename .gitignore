@@ -1,0 +1,10 @@
+# build outputs
+*.COM
+*.com
+*.obj
+*.OBJ
+*.lst
+*.LST
+
+# test session scratch area
+tests/work/
