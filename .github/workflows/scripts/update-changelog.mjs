@@ -89,8 +89,10 @@ export function prependSection(existing, section) {
 // ---------------------------------------------------------------------------
 // Git helpers (used when invoked as a script)
 // ---------------------------------------------------------------------------
-function gitLastTag() {
-    const r = spawnSync('git', ['describe', '--tags', '--abbrev=0'], { encoding: 'utf8' });
+function gitLastTag(matchPattern) {
+    const args = ['describe', '--tags', '--abbrev=0'];
+    if (matchPattern) args.push(`--match=${matchPattern}`);
+    const r = spawnSync('git', args, { encoding: 'utf8' });
     if (r.status !== 0) return null;
     return (r.stdout || '').trim() || null;
 }
@@ -132,7 +134,11 @@ function main() {
         process.exit(2);
     }
 
-    const since   = gitLastTag();
+    // Releases measure from the last STABLE tag (v1.2.3 / vyyyyMMdd) so a
+    // same-day nightly-* tag never swallows the release's commit range.
+    // Nightlies keep the nearest tag of any kind: their notes are the delta
+    // since the previous nightly (or stable, whichever is closer).
+    const since   = gitLastTag(mode === 'release' ? 'v[0-9]*' : null);
     const commits = gitCommits(since);
 
     const header = mode === 'nightly'
