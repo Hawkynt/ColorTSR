@@ -8,3 +8,6 @@
 
 # test session scratch area
 tests/work/
+
+# generated at workflow runtime, never committed
+RELEASE_NOTES.md

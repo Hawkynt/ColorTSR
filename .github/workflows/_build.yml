@@ -1,0 +1,57 @@
+name: Build artifacts
+
+# Shared build/pack block. Called by release.yml (manual dispatch) and
+# nightly.yml (auto, on CI success). Single place that turns a commit into
+# shippable artifacts so release and nightly never diverge.
+#
+# Versioning: FILES drive versions, never git tags -- the root VERSION file
+# plus the repo commit count, composed by version.pl as X.Y.Z.BUILD.
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref/SHA to build (defaults to caller ref)
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+# Force JavaScript-based actions to run on Node 24 instead of the deprecated Node 20 ahead of
+# the 2026-06-16 hard cutover, until we bump each action to a Node-24-native major version.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+  JWASM_VERSION: v2.20
+
+jobs:
+  build:
+    runs-on: ubuntu-latest                        # a DOS .COM needs no per-OS publish
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0                          # version.pl counts commits
+
+      - name: Set up JWasm
+        run: |
+          git clone --depth 1 --branch "$JWASM_VERSION" https://github.com/Baron-von-Riedesel/JWasm.git "$RUNNER_TEMP/JWasm"
+          make -C "$RUNNER_TEMP/JWasm" -f GccUnix.mak
+          sudo install "$(find "$RUNNER_TEMP/JWasm/build" -name jwasm -type f)" /usr/local/bin/jwasm
+
+      - name: Compute version (VERSION file + commit count)
+        run: echo "VER=$(perl .github/workflows/scripts/version.pl)" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: make
+
+      - name: Package
+        run: |
+          mkdir dist
+          cp COLTSR.COM dist/
+          zip -j "dist/ColorTSR-$VER.zip" COLTSR.COM README.md LICENSE CHANGELOG.md
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-artifacts
+          path: dist/*

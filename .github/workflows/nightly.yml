@@ -1,0 +1,71 @@
+name: Nightly
+
+# Fires automatically after CI passes on main/master. A red CI run never produces
+# a nightly, so the "latest nightly" always points at tested code. Builds the
+# exact SHA CI validated (not branch tip).
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nightly
+  cancel-in-progress: true
+
+# Force JavaScript-based actions to run on Node 24 instead of the deprecated Node 20 ahead of
+# the 2026-06-16 hard cutover, until we bump each action to a Node-24-native major version.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  build:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    uses: ./.github/workflows/_build.yml
+    with:
+      ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+          fetch-depth: 0                         # update-changelog.mjs reads git log
+      - name: Compute nightly tag
+        run: echo "TAG=nightly-$(date -u +%Y%m%d)" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-artifacts
+          path: dist
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate release notes (functional changes, bucketed by + - * # !)
+        run: node .github/workflows/scripts/update-changelog.mjs --nightly --notes RELEASE_NOTES.md
+      - name: Publish nightly prerelease (same-day tag is reused)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: ${{ env.TAG }}
+          prerelease: true
+          files: dist/*
+          body_path: RELEASE_NOTES.md            # commit-message changelog, not GitHub's PR notes
+
+  prune:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: GFS prune of old nightlies (7 daily + 4 weekly + 3 monthly)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/workflows/scripts/prune-nightlies.mjs
