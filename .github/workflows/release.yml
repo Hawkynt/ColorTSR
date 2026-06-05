@@ -58,11 +58,13 @@ jobs:
             git commit -m "* update changelog for $REL [skip ci]"
             git push
           fi
+          echo "REL_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
-      - name: Create GitHub Release (dated marker; tags vyyyyMMdd)
+      - name: Create GitHub Release (dated marker; tags vyyyyMMdd at the changelog commit)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.REL }}
           name: ${{ env.REL }}
+          target_commitish: ${{ env.REL_SHA }}
           files: dist/*
           body_path: RELEASE_NOTES.md            # commit-message changelog, not GitHub's PR notes

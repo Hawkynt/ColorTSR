@@ -1,12 +1,21 @@
 // Maintains CHANGELOG.md. Invoked from the nightly and release workflows.
 //
 // Usage:
-//   node .github/workflows/scripts/update-changelog.mjs --nightly          # "## Nightly YYYY-MM-DD (<version>)"
-//   node .github/workflows/scripts/update-changelog.mjs --release v1.2.3   # "## v1.2.3 (YYYY-MM-DD)"
+//   node .github/workflows/scripts/update-changelog.mjs --nightly --notes-only  # "## Nightly YYYY-MM-DD (<version>)"
+//   node .github/workflows/scripts/update-changelog.mjs --release v1.2.3        # "## v1.2.3 (YYYY-MM-DD)"
+//
+// Flags:
+//   --notes <file>   write the release-notes body (section minus header) there
+//   --notes-only     generate notes but do NOT touch CHANGELOG.md — used by
+//                    nightly.yml, which never commits the changelog (only
+//                    release.yml does), so writing it would be a dead write
+//   --version X.Y.Z  decorates the nightly header
 //
 // Commit subject conventions (see bucketize() below):
 //   + Added  * Changed  # Fixed  - Removed  ! TODO
-// Anything else goes into "Other".
+// Anything else goes into "Other". The workflow's own changelog-refresh
+// commits ("* update changelog for vyyyyMMdd") are bookkeeping, not change —
+// they are filtered out entirely (see isChangelogCommit()).
 
 import fs   from 'node:fs';
 import path from 'node:path';
@@ -41,6 +50,14 @@ const PREFIX_TO_BUCKET = {
     '-': 'Removed',
     '!': 'TODO',
 };
+
+// The release workflow's own bookkeeping commit ("* update changelog for
+// vyyyyMMdd [skip ci]"). It must never appear in notes: even though release.yml
+// tags the release ON that commit, a manual tag or a resurrected history could
+// still leak it into a later range — so the generator filters it defensively.
+export function isChangelogCommit(subject) {
+    return /^\*\s*update changelog for v\d{8}\b/.test(subject || '');
+}
 
 export function bucketize(commits) {
     const buckets = Object.fromEntries(BUCKET_ORDER.map(b => [b, []]));
@@ -121,6 +138,7 @@ function main() {
     let tag  = null;
     let version = null;
     let notesPath = null;       // --notes <file>: write the release-notes body here
+    let notesOnly = false;      // --notes-only: leave CHANGELOG.md untouched
 
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
@@ -128,9 +146,10 @@ function main() {
         else if (a === '--release') { mode = 'release'; tag = argv[++i]; }
         else if (a === '--version') { version = argv[++i]; }
         else if (a === '--notes') { notesPath = argv[++i]; }
+        else if (a === '--notes-only') { notesOnly = true; }
     }
     if (!mode) {
-        console.error('usage: update-changelog.mjs --nightly | --release <tag> [--version X.Y.Z.B] [--notes <file>]');
+        console.error('usage: update-changelog.mjs --nightly | --release <tag> [--version X.Y.Z.B] [--notes <file>] [--notes-only]');
         process.exit(2);
     }
 
@@ -139,7 +158,7 @@ function main() {
     // Nightlies keep the nearest tag of any kind: their notes are the delta
     // since the previous nightly (or stable, whichever is closer).
     const since   = gitLastTag(mode === 'release' ? 'v[0-9]*' : null);
-    const commits = gitCommits(since);
+    const commits = gitCommits(since).filter(c => !isChangelogCommit(c.subject));
 
     const header = mode === 'nightly'
         ? `Nightly ${isoToday()}${version ? ` (${version})` : ''}`
@@ -155,6 +174,11 @@ function main() {
         const body = section.replace(/^##[^\n]*\n\n?/, '');
         fs.writeFileSync(notesPath, body.trimEnd() + '\n');
         console.log(`Wrote release notes to ${notesPath}.`);
+    }
+
+    if (notesOnly) {
+        console.log('--notes-only: CHANGELOG.md left untouched.');
+        return;
     }
 
     if (commits.length === 0) {

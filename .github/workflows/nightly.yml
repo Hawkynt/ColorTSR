@@ -47,12 +47,20 @@ jobs:
         with:
           node-version: '22'
       - name: Generate release notes (functional changes, bucketed by + - * # !)
-        run: node .github/workflows/scripts/update-changelog.mjs --nightly --notes RELEASE_NOTES.md
-      - name: Publish nightly prerelease (same-day tag is reused)
+        run: node .github/workflows/scripts/update-changelog.mjs --nightly --notes-only --notes RELEASE_NOTES.md
+
+      # Same-day re-run: drop the existing nightly release AND its tag first,
+      # so the tag always points at the SHA that was actually built.
+      - name: Replace same-day nightly (release + tag), if any
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release delete "$TAG" --cleanup-tag --yes || true
+      - name: Publish nightly prerelease
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG }}
           name: ${{ env.TAG }}
+          target_commitish: ${{ github.event.workflow_run.head_sha || github.sha }}
           prerelease: true
           files: dist/*
           body_path: RELEASE_NOTES.md            # commit-message changelog, not GitHub's PR notes
