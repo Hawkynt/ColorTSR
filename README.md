@@ -1,10 +1,9 @@
-# 🎨 Color TSR - Syntax Highlighting for MS-DOS
+# ColorTSR
 
 [![License](https://img.shields.io/github/license/Hawkynt/ColorTSR)](https://github.com/Hawkynt/ColorTSR/blob/main/LICENSE)
 [![Language](https://img.shields.io/github/languages/top/Hawkynt/ColorTSR?color=8957D5)](https://github.com/Hawkynt/ColorTSR)
-[![Build](https://github.com/Hawkynt/ColorTSR/actions/workflows/ci.yml/badge.svg)](https://github.com/Hawkynt/ColorTSR/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/Hawkynt/ColorTSR)](https://github.com/Hawkynt/ColorTSR/releases/latest)
 
+[![CI](https://github.com/Hawkynt/ColorTSR/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Hawkynt/ColorTSR/actions/workflows/ci.yml)
 ![Last Commit](https://img.shields.io/github/last-commit/Hawkynt/ColorTSR?branch=main)
 ![Activity](https://img.shields.io/github/commit-activity/m/Hawkynt/ColorTSR)
 
@@ -14,87 +13,51 @@
 ![Code Size](https://img.shields.io/github/languages/code-size/Hawkynt/ColorTSR?color=4CAF50)
 ![Repo Size](https://img.shields.io/github/repo-size/Hawkynt/ColorTSR?color=FF9800)
 
-> Ever wished for a splash of color in your MS-DOS text editor? ✨ This little TSR brings syntax highlighting to your favorite classic editors!
+[![Release](https://img.shields.io/github/v/release/Hawkynt/ColorTSR?sort=semver)](https://github.com/Hawkynt/ColorTSR/releases/latest)
+[![Nightly](https://img.shields.io/github/v/release/Hawkynt/ColorTSR?include_prereleases=true&sort=date&label=nightly&color=FF9800)](https://github.com/Hawkynt/ColorTSR/releases)
+[![Downloads](https://img.shields.io/github/downloads/Hawkynt/ColorTSR/total)](https://github.com/Hawkynt/ColorTSR/releases)
 
-## 🤔 What is it?
+> A tiny terminate-and-stay-resident program for MS-DOS that recolours the text screen in the background, giving plain text-mode editors like EDIT, Turbo Pascal or Power BASIC live syntax highlighting — digits, operators, brackets and string literals each get their own colour while you type, on machines that never had it built in.
 
-Color TSR is a [Terminate-and-Stay-Resident (TSR)](https://en.wikipedia.org/wiki/Terminate-and-stay-resident_program) program for MS-DOS. In simple terms, it's a small program that loads into memory and runs in the background, enhancing other programs. In this case, it adds color to text as you type in various text editors.
+## Install
 
-## 🚀 Features
+Download `COLTSR.COM` from the [latest release](https://github.com/Hawkynt/ColorTSR/releases/latest) (or a `nightly-*` prerelease), put it somewhere on your DOS `PATH`, and load it — optionally from `AUTOEXEC.BAT`.
 
-*   **Real-time Syntax Highlighting:** Adds color to keywords, strings, numbers, and symbols as you type.
-*   **Lightweight:** It's a tiny program that won't slow down your system.
-*   **Customizable:** (Future goal) The color scheme can be customized.
+## Usage
 
-## 💻 Compatibility
+```text
+C:\> COLTSR.COM
+Handler installed !
 
-This TSR works with many text-based editors on MS-DOS, including:
+C:\> EDIT MYFILE.BAS      (any text-mode editor)
 
-*   MS-DOS Editor (`EDIT`)
-*   Power BASIC
-*   Turbo Pascal
-*   Turbo C
-*   ...and many others!
-
-## 🛠️ How to Use
-
-1.  **Get the binary:** Download `COLTSR.COM` from the [latest release](https://github.com/Hawkynt/ColorTSR/releases/latest), or build it yourself (see below).
-2.  **Run the TSR:**
-    ```bash
-    COLTSR.COM
-    ```
-    The TSR is now loaded into memory.
-3.  **Start your editor:**
-    ```bash
-    EDIT MYFILE.TXT
-    ```
-    You should now see syntax highlighting in the editor.
-4.  **To unload the TSR:**
-    ```bash
-    COLTSR.COM
-    ```
-    Running the program again will unload it from memory.
-
-## 🏗️ Building from Source
-
-The source is written in MASM/TASM dialect. It assembles with the open-source [JWasm](https://github.com/Baron-von-Riedesel/JWasm) (or [UASM](https://github.com/Terraspace/UASM)) on any modern OS, and with Borland's TASM on real DOS:
-
-```bash
-# JWasm (Windows/Linux/macOS)
-jwasm -bin -Fo=COLTSR.COM COLTSR.ASM
-
-# or simply
-make
+C:\> COLTSR.COM
+Freed Memory
 ```
 
-> **Note:** NASM will *not* assemble this source — it uses a different syntax dialect.
+Running it a second time unloads it from memory again.
 
-## ✅ Testing
+## Features
 
-The test suite runs the real binary inside [DOSBox](https://www.dosbox.com/) and verifies its observable behavior: install/uninstall messages, actual colorization of video memory (digits, operators, strings — including boundary cells), the negative control after removal, and the refusal to unload while another TSR owns the interrupt vectors.
+- Real-time colouring of digits, operators, brackets and quoted strings, written straight into text video memory on the timer interrupt
+- Editor-agnostic: works with MS-DOS `EDIT`, Power BASIC, Turbo Pascal, Turbo C and most other text-mode editors
+- Tiny single-segment `.COM` TSR, well under 1 KiB resident
+- Detects double-loading, and refuses to unload (instead of crashing) when another TSR has chained into the interrupt vectors after it
+- Caveat: it is always active once loaded — it does not detect which program is in the foreground, so any text-mode application gets coloured
+
+## Building
+
+The source is MASM/TASM dialect — it assembles with the open-source [JWasm](https://github.com/Baron-von-Riedesel/JWasm) (or [UASM](https://github.com/Terraspace/UASM)) on any modern OS, and with Borland's TASM on real DOS. NASM will *not* assemble it (different syntax dialect).
 
 ```bash
-make test            # needs jwasm + dosbox on the PATH
+make        # assemble COLTSR.COM (needs jwasm on the PATH)
+make test   # run the behavioral suite inside DOSBox (needs dosbox on the PATH)
 ```
 
-Both build and tests run automatically in CI on every push and pull request; tagging `v*` builds, tests, and publishes a release.
+The test suite runs the real binary in DOSBox and verifies observable behavior: install/remove round-trip, actual colourization of video memory (equivalence classes and boundary cells), a negative control after removal, and the refused removal while the interrupt vectors are foreign-owned.
 
-## ⚠️ Limitations
+CI builds and tests every push and pull request on ubuntu and windows. Every green CI run on `main` publishes a `nightly-yyyyMMdd` prerelease; stable releases are cut by manually dispatching the Release workflow, which tags the dated marker `vyyyyMMdd` — the artifact version itself comes from the `VERSION` file plus the commit count (`version.pl`), never from git tags.
 
-The TSR is always active once loaded. It doesn't detect if you are in a supported text editor, so it will try to color text in any application. This is usually harmless, but can have unexpected visual results.
+## License
 
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to open an issue or submit a pull request. Some ideas for improvement:
-
-*   Add a configuration file for custom colors.
-*   Improve editor detection.
-*   Add support for more languages/syntaxes.
-
-## 📜 License
-
-This project is licensed under the LGPL 3.0 License. See the [LICENSE](LICENSE) file for details.
-
-## 🙏 Credits
-
-*   **Author:** Hawkynt
+Licensed under LGPL-3.0 — see [LICENSE](LICENSE).
