@@ -1,6 +1,6 @@
 .model tiny
-codeseg
 .386
+.code
 org 100h
 Int2FKennung equ 0f3h
 ; (c) 2001 by Hawkynt
