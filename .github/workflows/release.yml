@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+env:
+  JWASM_VERSION: v2.20
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install DOSBox
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dosbox zip
+
+      - name: Build JWasm
+        run: |
+          git clone --depth 1 --branch "$JWASM_VERSION" https://github.com/Baron-von-Riedesel/JWasm.git /tmp/JWasm
+          make -C /tmp/JWasm -f GccUnix.mak
+          sudo install "$(find /tmp/JWasm/build -name jwasm -type f)" /usr/local/bin/jwasm
+
+      - name: Build
+        run: make
+
+      - name: Test
+        run: make test
+
+      - name: Package
+        run: zip "ColorTSR-${GITHUB_REF_NAME}.zip" COLTSR.COM README.md LICENSE
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ColorTSR-*.zip
+            COLTSR.COM
+          generate_release_notes: true

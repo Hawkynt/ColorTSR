@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  JWASM_VERSION: v2.20
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install DOSBox
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dosbox
+
+      - name: Build JWasm
+        run: |
+          git clone --depth 1 --branch "$JWASM_VERSION" https://github.com/Baron-von-Riedesel/JWasm.git /tmp/JWasm
+          make -C /tmp/JWasm -f GccUnix.mak
+          sudo install "$(find /tmp/JWasm/build -name jwasm -type f)" /usr/local/bin/jwasm
+          jwasm -h | head -3
+
+      - name: Build
+        run: make
+
+      - name: Test
+        run: make test
+
+      - name: Upload test session output on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: tests/work/*.TXT
+          if-no-files-found: ignore
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: COLTSR
+          path: COLTSR.COM
