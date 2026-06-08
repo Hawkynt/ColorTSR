@@ -13,7 +13,7 @@
 ![Code Size](https://img.shields.io/github/languages/code-size/Hawkynt/ColorTSR?color=4CAF50)
 ![Repo Size](https://img.shields.io/github/repo-size/Hawkynt/ColorTSR?color=FF9800)
 
-[![Release](https://img.shields.io/github/v/release/Hawkynt/ColorTSR?sort=semver)](https://github.com/Hawkynt/ColorTSR/releases/latest)
+[![Release](https://img.shields.io/github/v/release/Hawkynt/ColorTSR)](https://github.com/Hawkynt/ColorTSR/releases/latest)
 [![Nightly](https://img.shields.io/github/v/release/Hawkynt/ColorTSR?include_prereleases&sort=date&label=nightly&color=FF9800)](https://github.com/Hawkynt/ColorTSR/releases)
 [![Downloads](https://img.shields.io/github/downloads/Hawkynt/ColorTSR/total)](https://github.com/Hawkynt/ColorTSR/releases)
 
