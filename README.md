@@ -14,7 +14,7 @@
 ![Repo Size](https://img.shields.io/github/repo-size/Hawkynt/ColorTSR?color=FF9800)
 
 [![Release](https://img.shields.io/github/v/release/Hawkynt/ColorTSR)](https://github.com/Hawkynt/ColorTSR/releases/latest)
-[![Nightly](https://img.shields.io/github/v/release/Hawkynt/ColorTSR?include_prereleases&sort=date&label=nightly&color=FF9800)](https://github.com/Hawkynt/ColorTSR/releases)
+[![Nightly](https://img.shields.io/github/v/release/Hawkynt/ColorTSR?include_prereleases&sort=date&filter=nightly-*&label=nightly&color=FF9800)](https://github.com/Hawkynt/ColorTSR/releases)
 [![Downloads](https://img.shields.io/github/downloads/Hawkynt/ColorTSR/total)](https://github.com/Hawkynt/ColorTSR/releases)
 
 > A tiny terminate-and-stay-resident program for MS-DOS that recolours the text screen in the background, giving plain text-mode editors like EDIT, Turbo Pascal or Power BASIC live syntax highlighting — digits, operators, brackets and string literals each get their own colour while you type, on machines that never had it built in.
