@@ -19,11 +19,31 @@
 
 > A tiny terminate-and-stay-resident program for MS-DOS that recolours the text screen in the background, giving plain text-mode editors like EDIT, Turbo Pascal or Power BASIC live syntax highlighting — digits, operators, brackets and string literals each get their own colour while you type, on machines that never had it built in.
 
-## 📦 Install
+## 🧭 Vision
+
+Text-mode editors on MS-DOS never had syntax highlighting, and the machines that ran them are long
+past getting it from their authors. ColorTSR adds it from the outside: a resident program that
+colours whatever is already on the text screen, so an editor that knows nothing about colour gets it
+anyway — unmodified, and unaware.
+
+The two things it means to keep are the ones that make it worth loading at all on the hardware it
+targets: staying small enough to disappear into a corner of conventional memory, and behaving
+correctly when it is not the only resident program in the machine rather than merely working on a
+clean boot.
+
+## ✨ Features
+
+- Real-time colouring of digits, operators, brackets and quoted strings, written straight into text video memory on the timer interrupt
+- Editor-agnostic: works with MS-DOS `EDIT`, Power BASIC, Turbo Pascal, Turbo C and most other text-mode editors
+- Tiny single-segment `.COM` TSR, well under 1 KiB resident
+- Detects double-loading, and refuses to unload (instead of crashing) when another TSR has chained into the interrupt vectors after it
+- Caveat: it is always active once loaded — it does not detect which program is in the foreground, so any text-mode application gets coloured
+
+## 📦 Installation
 
 Download `COLTSR.COM` from the [latest release](https://github.com/Hawkynt/ColorTSR/releases/latest) (or a `nightly-*` prerelease), put it somewhere on your DOS `PATH`, and load it — optionally from `AUTOEXEC.BAT`.
 
-## 🚀 Usage
+## 🚀 Quick start
 
 ```text
 C:\> COLTSR.COM
@@ -36,14 +56,6 @@ Freed Memory
 ```
 
 Running it a second time unloads it from memory again.
-
-## ✨ Features
-
-- Real-time colouring of digits, operators, brackets and quoted strings, written straight into text video memory on the timer interrupt
-- Editor-agnostic: works with MS-DOS `EDIT`, Power BASIC, Turbo Pascal, Turbo C and most other text-mode editors
-- Tiny single-segment `.COM` TSR, well under 1 KiB resident
-- Detects double-loading, and refuses to unload (instead of crashing) when another TSR has chained into the interrupt vectors after it
-- Caveat: it is always active once loaded — it does not detect which program is in the foreground, so any text-mode application gets coloured
 
 ## 🛠️ Building
 
